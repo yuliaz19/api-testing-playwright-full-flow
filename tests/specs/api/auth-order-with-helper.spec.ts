@@ -5,6 +5,7 @@ import {
   getOrderById,
   deleteOrder,
   getDeletedOrderById,
+  getAllOrders,
 } from '../../helpers/api-helper'
 import { StatusDto } from '../../dto/status-dto'
 import { OrderDto } from '../../dto/order-dto'
@@ -33,4 +34,20 @@ test('create order and delete order by id and check deletion', async ({ request 
   console.log(orderId)
   await deleteOrder(request, jwt, orderId)
   await getDeletedOrderById(request, jwt, orderId)
+})
+
+test('create two orders and find all orders', async ({ request }) => {
+  const orderId1 = await createOrder(request, jwt)
+  expect.soft(orderId1).toBeGreaterThan(0)
+  const orderId2 = await createOrder(request, jwt)
+  expect.soft(orderId2).toBeGreaterThan(0)
+  const allOrders = await getAllOrders(request, jwt)
+  expect.soft(Array.isArray(allOrders)).toBeTruthy()
+  console.log(allOrders)
+  const lastOrder = allOrders[allOrders.length - 1] // as there is a lot of orders check the last two created
+  expect.soft(lastOrder.id).toBe(orderId2)
+  console.log(lastOrder.id)
+  const preLastOrder = allOrders[allOrders.length - 2]
+  console.log(preLastOrder.id)
+  expect.soft(preLastOrder.id).toBe(orderId1)
 })

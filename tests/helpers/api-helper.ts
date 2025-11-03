@@ -74,3 +74,24 @@ export async function deleteOrder(request: APIRequestContext, jwt: string, order
   })
   expect(response.status()).toBe(StatusCodes.OK)
 }
+
+export async function getAllOrders(request: APIRequestContext, jwt: string): Promise<OrderDto[]> {
+  const response = await request.get(`${serviceURL}${orderPath}`, {
+    headers: {
+      Authorization: `Bearer ${jwt}`,
+    },
+  })
+  expect(response.status()).toBe(StatusCodes.OK)
+  const data = await response.json()
+  return data.map(
+    (order: any) =>
+      new OrderDto(
+        order.status,
+        order.courierId,
+        order.customerName,
+        order.customerPhone,
+        order.comment,
+        order.id,
+      ),
+  )
+}
