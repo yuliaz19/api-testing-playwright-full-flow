@@ -6,14 +6,22 @@ import {
   deleteOrder,
   getDeletedOrderById,
   getAllOrders,
+  fetchJwtCourier,
+  assignOrder,
+  statusOrder,
 } from '../../helpers/api-helper'
 import { StatusDto } from '../../dto/status-dto'
 import { OrderDto } from '../../dto/order-dto'
 
 let jwt: string
+let jwtC: string
 
 test.beforeAll(async ({ request }) => {
   jwt = await fetchJwt(request)
+})
+
+test.beforeAll(async ({ request }) => {
+  jwtC = await fetchJwtCourier(request)
 })
 
 test('login and create order with api-helper', async ({ request }) => {
@@ -50,4 +58,15 @@ test('create two orders and find all orders', async ({ request }) => {
   const preLastOrder = allOrders[allOrders.length - 2]
   console.log(preLastOrder.id)
   expect.soft(preLastOrder.id).toBe(orderId1)
+})
+
+test('create order + assign it for courier + change status', async ({ request }) => {
+  const orderId = await createOrder(request, jwt)
+  const assOrder: OrderDto = await assignOrder(request, jwtC, orderId)
+  expect.soft(assOrder.id).toBe(orderId)
+  expect.soft(assOrder.courierId).toBe(2818)
+  const changedOrder: OrderDto = await statusOrder(request, jwtC, orderId, 'DELIVERED')
+  console.log(changedOrder)
+  expect.soft(changedOrder.id).toBe(orderId)
+  expect.soft(changedOrder.courierId).toBe(2818)
 })
