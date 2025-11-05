@@ -18,9 +18,6 @@ let jwtC: string
 
 test.beforeAll(async ({ request }) => {
   jwt = await fetchJwt(request)
-})
-
-test.beforeAll(async ({ request }) => {
   jwtC = await fetchJwtCourier(request)
 })
 
@@ -63,10 +60,11 @@ test('create two orders and find all orders', async ({ request }) => {
 test('create order + assign it for courier + change status', async ({ request }) => {
   const orderId = await createOrder(request, jwt)
   const assOrder: OrderDto = await assignOrder(request, jwtC, orderId)
+  const courierId = 2818
   expect.soft(assOrder.id).toBe(orderId)
-  expect.soft(assOrder.courierId).toBe(2818)
-  const changedOrder: OrderDto = await statusOrder(request, jwtC, orderId, 'DELIVERED')
+  expect.soft(assOrder.courierId).toBe(courierId)
+  const changedOrder: OrderDto = await statusOrder(request, jwtC, orderId, StatusDto.DELIVERED)
   console.log(changedOrder)
   expect.soft(changedOrder.id).toBe(orderId)
-  expect.soft(changedOrder.courierId).toBe(2818)
+  expect.soft(changedOrder.courierId).toBe(courierId)
 })
