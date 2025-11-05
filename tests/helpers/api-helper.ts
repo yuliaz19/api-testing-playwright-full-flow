@@ -2,6 +2,7 @@ import { APIRequestContext, expect } from '@playwright/test'
 import { StatusCodes } from 'http-status-codes'
 import { LoginDto } from '../dto/login-dto'
 import { OrderDto } from '../dto/order-dto'
+import { CourierLoginDto } from '../dto/courier-login-dto'
 
 const serviceURL = 'https://backend.tallinn-learning.ee/'
 const loginPath = 'login/student'
@@ -101,7 +102,7 @@ export async function getAllOrders(request: APIRequestContext, jwt: string): Pro
 
 export async function fetchJwtCourier(request: APIRequestContext): Promise<string> {
   const authResponse = await request.post(`${serviceURL}${loginPathCourier}`, {
-    data: LoginDto.createLoginWithCorrectDataCourier(),
+    data: CourierLoginDto.createCourierLogin(),
   })
   if (authResponse.status() !== StatusCodes.OK) {
     throw new Error(`Authorization failed. Status: ${authResponse.status()}`)

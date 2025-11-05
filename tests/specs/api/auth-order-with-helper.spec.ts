@@ -12,6 +12,7 @@ import {
 } from '../../helpers/api-helper'
 import { StatusDto } from '../../dto/status-dto'
 import { OrderDto } from '../../dto/order-dto'
+import { CourierLoginDto } from '../../dto/courier-login-dto'
 
 let jwt: string
 let jwtC: string
@@ -41,6 +42,18 @@ test('create order and delete order by id and check deletion', async ({ request 
   await getDeletedOrderById(request, jwt, orderId)
 })
 
+test('create order + assign it for courier + change status', async ({ request }) => {
+  const courier = CourierLoginDto.createCourierLogin()
+  const orderId = await createOrder(request, jwt)
+  const assOrder: OrderDto = await assignOrder(request, jwtC, orderId)
+  expect.soft(assOrder.id).toBe(orderId)
+  expect.soft(assOrder.courierId).toBe(courier.courierId)
+  const changedOrder: OrderDto = await statusOrder(request, jwtC, orderId, StatusDto.DELIVERED)
+  console.log(changedOrder)
+  expect.soft(changedOrder.id).toBe(orderId)
+  expect.soft(changedOrder.courierId).toBe(courier.courierId)
+})
+
 test('create two orders and find all orders', async ({ request }) => {
   const orderId1 = await createOrder(request, jwt)
   expect.soft(orderId1).toBeGreaterThan(0)
@@ -55,16 +68,4 @@ test('create two orders and find all orders', async ({ request }) => {
   const preLastOrder = allOrders[allOrders.length - 2]
   console.log(preLastOrder.id)
   expect.soft(preLastOrder.id).toBe(orderId1)
-})
-
-test('create order + assign it for courier + change status', async ({ request }) => {
-  const orderId = await createOrder(request, jwt)
-  const assOrder: OrderDto = await assignOrder(request, jwtC, orderId)
-  const courierId = 2818
-  expect.soft(assOrder.id).toBe(orderId)
-  expect.soft(assOrder.courierId).toBe(courierId)
-  const changedOrder: OrderDto = await statusOrder(request, jwtC, orderId, StatusDto.DELIVERED)
-  console.log(changedOrder)
-  expect.soft(changedOrder.id).toBe(orderId)
-  expect.soft(changedOrder.courierId).toBe(courierId)
 })
