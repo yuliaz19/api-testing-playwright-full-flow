@@ -1,10 +1,11 @@
-import { LoginDto } from './login-dto'
-
-export class CourierLoginDto extends LoginDto {
+export class CourierLoginDto {
+  username: string
+  password: string
   courierId: number
 
   private constructor(username: string, password: string, courierId: number) {
-    super(username, password)
+    this.username = username
+    this.password = password
     this.courierId = courierId
   }
 
