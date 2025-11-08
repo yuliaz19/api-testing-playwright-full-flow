@@ -5,14 +5,21 @@ import {
   getOrderById,
   deleteOrder,
   getDeletedOrderById,
+  getAllOrders,
+  fetchJwtCourier,
+  assignOrder,
+  statusOrder,
 } from '../../helpers/api-helper'
 import { StatusDto } from '../../dto/status-dto'
 import { OrderDto } from '../../dto/order-dto'
+import { CourierLoginDto } from '../../dto/courier-login-dto'
 
 let jwt: string
+let jwtC: string
 
 test.beforeAll(async ({ request }) => {
   jwt = await fetchJwt(request)
+  jwtC = await fetchJwtCourier(request)
 })
 
 test('login and create order with api-helper', async ({ request }) => {
@@ -33,4 +40,32 @@ test('create order and delete order by id and check deletion', async ({ request 
   console.log(orderId)
   await deleteOrder(request, jwt, orderId)
   await getDeletedOrderById(request, jwt, orderId)
+})
+
+test('create order + assign it for courier + change status', async ({ request }) => {
+  const courier = CourierLoginDto.createCourierLogin()
+  const orderId = await createOrder(request, jwt)
+  const assOrder: OrderDto = await assignOrder(request, jwtC, orderId)
+  expect.soft(assOrder.id).toBe(orderId)
+  expect.soft(assOrder.courierId).toBe(courier.courierId)
+  const changedOrder: OrderDto = await statusOrder(request, jwtC, orderId, StatusDto.DELIVERED)
+  console.log(changedOrder)
+  expect.soft(changedOrder.id).toBe(orderId)
+  expect.soft(changedOrder.courierId).toBe(courier.courierId)
+})
+
+test('create two orders and find all orders', async ({ request }) => {
+  const orderId1 = await createOrder(request, jwt)
+  expect.soft(orderId1).toBeGreaterThan(0)
+  const orderId2 = await createOrder(request, jwt)
+  expect.soft(orderId2).toBeGreaterThan(0)
+  const allOrders = await getAllOrders(request, jwt)
+  expect.soft(Array.isArray(allOrders)).toBeTruthy()
+  console.log(allOrders)
+  const lastOrder = allOrders[allOrders.length - 1] // as there is a lot of orders check the last two created
+  expect.soft(lastOrder.id).toBe(orderId2)
+  console.log(lastOrder.id)
+  const preLastOrder = allOrders[allOrders.length - 2]
+  console.log(preLastOrder.id)
+  expect.soft(preLastOrder.id).toBe(orderId1)
 })

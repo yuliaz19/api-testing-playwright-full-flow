@@ -29,7 +29,7 @@ export class OrderDto {
     return new OrderDto(
       StatusDto.OPEN,
       Math.floor(Math.random() * 100),
-      'John Doe',
+      'Jane D',
       '+123456789',
       'Urgent order',
       Math.floor(Math.random() * 100),
